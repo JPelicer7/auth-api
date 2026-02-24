@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDTO, SignUpDTO } from './dtos/auth';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
-import { UserRepository } from './repositories/user-repository';
+import { UpdateUserData, UserRepository } from './repositories/user-repository';
 
 
 @Injectable()
@@ -48,6 +48,14 @@ export class AuthService {
         
 
         return {accessToken};
+    }
+    
+    async update(id: number, data: UpdateUserData) {
+        const userExists = await this.UserRepository.findById(id)
+        if(!userExists) throw new UnauthorizedException("Usuário não encontrado!")
+
+        const updatedUser = await this.UserRepository.update(id, data)
+        return updatedUser
     }
 
     async delete(userId: number) {

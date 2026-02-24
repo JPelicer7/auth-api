@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
-import { SignInDTO, SignUpDTO } from './dtos/auth';
+import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { SignInDTO, SignUpDTO, updateUserDTO } from './dtos/auth';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 
@@ -27,10 +27,21 @@ export class AuthController {
         
     }
 
+    //GET auth/me
     @UseGuards(AuthGuard)
     @Get('me')
     async me(@Request() request) {
         return request.user;
+    }
+
+    //PUT auth/update/:id
+    @UseGuards(AuthGuard)
+    @Put('update/:id')
+    async update(@Param('id') id: string, @Body() body: updateUserDTO ) {
+        await this.AuthService.update(+id, body)
+        return {
+            message: 'Usuário atualizado com sucesso!'
+        };
     }
 
     @UseGuards(AuthGuard)

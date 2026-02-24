@@ -21,3 +21,8 @@ export class SignInDTO {
     @IsNotEmpty()
     password: string;
 }
+
+export class updateUserDTO {
+    name?: string
+    email?: string
+}

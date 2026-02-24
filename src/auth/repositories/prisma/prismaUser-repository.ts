@@ -1,5 +1,5 @@
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreateUserData, UserRepository } from "../user-repository";
+import { CreateUserData, UpdateUserData, UserRepository } from "../user-repository";
 import { Injectable } from "@nestjs/common";
 import { User } from "@prisma/client";
 
@@ -30,6 +30,15 @@ export class prismaUserRepository implements UserRepository {
             }
         })
         return user
+    }
+
+    async update(id: number, attributes: UpdateUserData) {
+        const updatedUser = await this.prisma.user.update({
+            where: {id: id},
+            data: {...attributes}
+        })
+
+        return updatedUser;
     }
 
     async delete(userId: number): Promise<User | null> {
