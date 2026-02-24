@@ -1,18 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDTO, SignUpDTO } from './dtos/auth';
-import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
+import { UserRepository } from './repositories/user-repository';
+
 
 @Injectable()
 export class AuthService {
-    constructor(private PrismaService: PrismaService, private jwtService: JwtService) {}
+    constructor(private UserRepository: UserRepository, private jwtService: JwtService) {}
 
     async signup(data: SignUpDTO) {
 
-        const userExists = await this.PrismaService.user.findUnique({
-            where: {email: data.email}
-        })
+        const userExists = await this.UserRepository.findByEmail(data.email)
 
         if(userExists) {
             throw new UnauthorizedException("Email já cadastrado!")
@@ -20,12 +19,10 @@ export class AuthService {
         
         const hashedPassword = await bcrypt.hash(data.password, 10)
 
-        const user = await this.PrismaService.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: hashedPassword
-            }
+        const user = await this.UserRepository.create({
+            name: data.name,
+            email: data.email,
+            password: hashedPassword
         })
 
         return {
@@ -37,7 +34,7 @@ export class AuthService {
 
     async signin(data: SignInDTO) {
 
-        const user = await this.PrismaService.user.findFirst({where: {email: data.email}})
+        const user = await this.UserRepository.findByEmail(data.email)
         if(!user) throw new UnauthorizedException("Credencias Inválidas!")
 
         const passwordMatch = await bcrypt.compare(data.password, user.password)
@@ -51,5 +48,13 @@ export class AuthService {
         
 
         return {accessToken};
+    }
+
+    async delete(userId: number) {
+        const userExists = await this.UserRepository.findById(userId)
+        if(!userExists) throw new UnauthorizedException("Usuário não encontrado!")
+        
+        const deletedUser = await this.UserRepository.delete(userId)
+        return deletedUser
     }
 }

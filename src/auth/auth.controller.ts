@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
 import { SignInDTO, SignUpDTO } from './dtos/auth';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -31,5 +31,15 @@ export class AuthController {
     @Get('me')
     async me(@Request() request) {
         return request.user;
+    }
+
+    @UseGuards(AuthGuard)
+    //DELETE /auth/delete/:id
+    @Delete('delete/:id')
+    async delete(@Param('id') id: string) {
+        await this.AuthService.delete(+id)
+        return {
+            message: 'Usuário removido com sucesso!'
+        };
     }
 }
